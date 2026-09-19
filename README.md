@@ -1,66 +1,41 @@
-## Foundry
+# Token Vesting Vault
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A Solidity smart contract for releasing ERC-20 tokens to beneficiaries over time with cliff and linear vesting. Built with Foundry.
 
-Foundry consists of:
+## What it does
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The owner creates vesting schedules for employees, investors or grant recipients. Each schedule has a token, beneficiary, total amount, start time, cliff duration and vesting duration. Nothing is released before the cliff. After the cliff, tokens unlock linearly every second until the full duration ends. Only the beneficiary can claim vested tokens. If a schedule is revocable, the owner can cancel it — the beneficiary keeps what already vested and the owner receives the unvested remainder.
 
-## Documentation
+## Setup
 
-https://book.getfoundry.sh/
+git clone https://github.com/Alike001/token-vesting-vault
+cd token-vesting-vault
+forge install
+forge build
 
-## Usage
+## Run Tests
 
-### Build
+forge test -vvv
 
-```shell
-$ forge build
-```
+## Contract Functions
 
-### Test
+- createSchedule() — owner creates a vesting schedule and deposits tokens
+- claim() — beneficiary claims their currently vested and unclaimed tokens
+- revoke() — owner cancels a revocable schedule, preserving already vested tokens
+- claimable() — view function returning how many tokens are currently claimable
 
-```shell
-$ forge test
-```
+## Key Rules
 
-### Format
+- Nothing vests before the cliff period
+- Vesting is linear from start to end of duration
+- Only the beneficiary can claim their own tokens
+- Double claiming is prevented — claimed amount is tracked
+- Revocation preserves already vested tokens for the beneficiary
+- Non-revocable schedules cannot be cancelled
+- Cliff duration cannot exceed total duration
 
-```shell
-$ forge fmt
-```
+## Built with
 
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- Solidity ^0.8.20
+- Foundry
+- Forge tests with vm.warp, vm.prank, vm.expectRevert
